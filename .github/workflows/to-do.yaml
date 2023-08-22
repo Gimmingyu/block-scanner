@@ -6,21 +6,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Move issue to specific column
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          issue_number=${{ github.event.issue.number }}
-          repository="${{ github.repository }}"
-          project_id=1
-          column_id=1
-          
-          # Find the issue's current card ID
-          card_id=$(curl -s -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.inertia-preview+json" "https://api.github.com/repos/$repository/projects/columns/$column_id/cards" | jq '.[] | select(.content_url == "https://api.github.com/repos/'$repository'/issues/'$issue_number'") | .id')
-          
-          # Move the card to the desired column
-          if [ -n "$card_id" ]; then
-            curl -s -X POST -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.inertia-preview+json" "https://api.github.com/projects/columns/cards/$card_id/moves" -d '{"position": "top", "column_id": '$column_id'}'
-          else
-            # Create a new card in the desired column if it doesn't exist
-            curl -s -X POST -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.inertia-preview+json" "https://api.github.com/repos/$repository/projects/columns/$column_id/cards" -d '{"content_id": '$issue_number', "content_type": "Issue"}'
-          fi
+        uses: alex-page/github-project-automation-plus@v0.8.3
+        with:
+          project: block-scanner
+          column: Todo
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
