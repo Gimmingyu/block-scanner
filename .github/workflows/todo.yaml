@@ -1,0 +1,13 @@
+on:
+  issues:
+    types: [ opened, reopened ]
+jobs:
+  manage-board:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Move issue to specific column
+        uses: alex-page/github-project-automation-plus@v0.8.3
+        with:
+          project: block-scanner
+          column: Todo
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
