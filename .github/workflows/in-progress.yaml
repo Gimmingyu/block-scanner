@@ -1,0 +1,25 @@
+#on:
+#  create: # Trigger when a branch or tag is created
+#    types: [ branch ]
+#jobs:
+#  move-to-in-progress:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Check out code
+#        uses: actions/checkout@v2
+#
+#      - name: Move issue to In Progress column if branch name matches pattern
+#        run: |
+#          # Extract issue number from branch name
+#          ISSUE_NUMBER=$(echo ${{ github.ref }} | grep -Eo 'feat/[0-9]+' | cut -d '/' -f 2)
+#
+#          # Check if the branch name matches the pattern and issue number is found
+#          if [ ! -z "$ISSUE_NUMBER" ]; then
+#            echo "Found matching issue number: $ISSUE_NUMBER"
+#            gh api projects/columns/YOUR_COLUMN_ID/cards -H "Accept: application/vnd.github.inertia-preview+json" -X POST -F content_id=$ISSUE_NUMBER -F content_type=Issue
+#          else
+#            echo "No matching issue found for branch name."
+#          fi
+#        env:
+#          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        shell: bash
