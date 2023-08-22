@@ -3,6 +3,7 @@ on:
     types: [ opened, reopened ]
 jobs:
   manage-board:
+    permissions: write-all
     runs-on: ubuntu-latest
     steps:
       - name: Move issue to specific column
