@@ -1,6 +1,13 @@
 package main
 
-import "scanner/internal/env"
+import (
+	"log"
+	"os"
+	"scanner/cmd/ethereum/container"
+	"scanner/cmd/ethereum/internal"
+	"scanner/internal/env"
+	"scanner/internal/evm"
+)
 
 func init() {
 	if err := env.LoadEnv(".env"); err != nil {
@@ -10,4 +17,12 @@ func init() {
 
 func main() {
 
+	endpoint := os.Getenv("ETHEREUM_NODE_ENDPOINT")
+	ethClient, err := evm.NewEthClient(endpoint)
+	if err != nil {
+		log.Panicf("failed to create ethereum client: %v", err)
+	}
+
+	c := container.NewContainer(ethClient)
+	_ = internal.New(c)
 }
