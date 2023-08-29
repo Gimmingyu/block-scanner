@@ -6,14 +6,13 @@ import (
 )
 
 type Container struct {
-	client *ethclient.Client
-	evm.Service
+	client evm.Service
 }
 
-func (c *Container) Client() *ethclient.Client {
+func (c *Container) Client() evm.Service {
 	return c.client
 }
 
 func NewContainer(client *ethclient.Client) *Container {
-	return &Container{client: client}
+	return &Container{client: evm.New(client)}
 }
