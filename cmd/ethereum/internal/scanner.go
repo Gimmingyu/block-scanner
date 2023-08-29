@@ -1,8 +1,6 @@
 package internal
 
-type Scanner interface {
-	BlockNumber() (uint64, error)
-}
-
-type scanner struct {
+func (a *App) Scan() error {
+	// TODO: implement me
+	panic("implement me")
 }

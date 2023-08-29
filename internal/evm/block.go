@@ -7,14 +7,14 @@ import (
 	"math/big"
 )
 
-func (a *App) CurrentBlockNumber() (uint64, error) {
-	return a.client.BlockNumber(context.Background())
+func (s *service) CurrentBlockNumber() (uint64, error) {
+	return s.client.BlockNumber(context.Background())
 }
 
-func (a *App) GetBlockByNumber(number *big.Int) (*types.Block, error) {
-	return a.client.BlockByNumber(context.Background(), number)
+func (s *service) GetBlockByNumber(number *big.Int) (*types.Block, error) {
+	return s.client.BlockByNumber(context.Background(), number)
 }
 
-func (a *App) GetBlockByHash(hash common.Hash) (*types.Block, error) {
-	return a.client.BlockByHash(context.Background(), hash)
+func (s *service) GetBlockByHash(hash common.Hash) (*types.Block, error) {
+	return s.client.BlockByHash(context.Background(), hash)
 }

@@ -11,5 +11,5 @@ func New(c *container.Container) *App {
 }
 
 func (a *App) Run() error {
-	return nil
+	return a.Scan()
 }
