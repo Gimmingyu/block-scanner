@@ -5,6 +5,7 @@ go 1.21.0
 require (
 	github.com/aws/aws-sdk-go v1.44.329
 	github.com/ethereum/go-ethereum v1.12.2
+	golang.org/x/sync v0.3.0
 )
 
 require (

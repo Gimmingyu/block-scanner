@@ -13,6 +13,7 @@ func (a *App) Scan() error {
 	var (
 		group                    *errgroup.Group
 		_                        context.Context
+		prevBlockNumber          uint64
 		currentBlockNumber       uint64
 		bigIntCurrentBlockNumber *big.Int
 		err                      error
@@ -30,6 +31,10 @@ func (a *App) Scan() error {
 				return fmt.Errorf("failed to get current block number: %v", err)
 			}
 
+			if prevBlockNumber == currentBlockNumber {
+				continue
+			}
+
 			bigIntCurrentBlockNumber = big.NewInt(int64(currentBlockNumber))
 			block, err = client.GetBlockByNumber(bigIntCurrentBlockNumber)
 			if err != nil {
@@ -38,6 +43,8 @@ func (a *App) Scan() error {
 
 			fmt.Printf("block number: %v\n", block.NumberU64())
 			// TODO: process block
+
+			prevBlockNumber = currentBlockNumber
 		}
 	})
 

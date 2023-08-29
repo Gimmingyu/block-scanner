@@ -24,5 +24,9 @@ func main() {
 	}
 
 	c := container.NewContainer(ethClient)
-	_ = internal.New(c)
+	app := internal.New(c)
+
+	if err := app.Run(); err != nil {
+		log.Panicf("failed to run ethereum scanner: %v", err)
+	}
 }
