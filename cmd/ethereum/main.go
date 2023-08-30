@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 	"os"
-	"scanner/cmd/ethereum/container"
-	"scanner/cmd/ethereum/internal"
+	"scanner/cmd/ethereum/internal/app"
+	"scanner/cmd/ethereum/internal/container"
 	"scanner/internal/env"
 	"scanner/internal/evm"
 )
@@ -24,9 +24,9 @@ func main() {
 	}
 
 	c := container.NewContainer(ethClient)
-	app := internal.New(c)
+	a := app.New(c)
 
-	if err := app.Run(); err != nil {
+	if err := a.Run(); err != nil {
 		log.Panicf("failed to run ethereum scanner: %v", err)
 	}
 }
