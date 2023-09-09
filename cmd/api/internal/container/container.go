@@ -1,5 +1,8 @@
-package main
+package container
 
-func main() {
+type Container struct {
+}
 
+func NewContainer() *Container {
+	return &Container{}
 }
