@@ -16,7 +16,7 @@ func init() {
 func main() {
 	client := solana.NewClient(os.Getenv("SOLANA_NODE_ENDPOINT"))
 
-	blockNumber, err := client.CurrentBlock()
+	blockNumber, err := client.CurrentBlockNumber()
 	if err != nil {
 		panic(err)
 	}

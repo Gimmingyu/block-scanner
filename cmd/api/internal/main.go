@@ -17,4 +17,8 @@ func main() {
 	a := app.NewApp(c)
 
 	a.AppendHandler()
+
+	if err := a.Run(); err != nil {
+		panic(err)
+	}
 }

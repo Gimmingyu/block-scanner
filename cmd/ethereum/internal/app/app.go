@@ -2,12 +2,15 @@ package app
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"github.com/ethereum/go-ethereum/core/types"
 	"golang.org/x/sync/errgroup"
 	"log"
 	"math/big"
 	"scanner/cmd/ethereum/internal/container"
 	"scanner/internal/evm"
+	"time"
 )
 
 type App struct {
@@ -32,6 +35,8 @@ func (a *App) Scan() error {
 		err                      error
 		client                   evm.Service
 		block                    map[string]interface{}
+		marshalled               []byte
+		blockData                *types.Block
 	)
 
 	client = a.container.Client()
@@ -41,24 +46,45 @@ func (a *App) Scan() error {
 		for {
 			currentBlockNumber, err = client.CurrentBlockNumber()
 			if err != nil {
-				return fmt.Errorf("failed to get current block number: %v", err)
+				fmt.Printf("failed to get current block number: %v\n", err)
+				goto Sleep
 			}
 
 			if prevBlockNumber == currentBlockNumber {
 				continue
 			}
 
+			log.Println(currentBlockNumber)
+
 			bigIntCurrentBlockNumber = big.NewInt(int64(currentBlockNumber))
 			block, err = client.GetBlockByNumber(bigIntCurrentBlockNumber)
 			if err != nil {
-				return fmt.Errorf("failed to get block by number: %v", err)
+				log.Printf("failed to get block by number: %v\n", err)
+				goto Sleep
 			}
 
-			//fmt.Printf("block number: %v\n", block.NumberU64())
 			log.Println(block)
-			// TODO: process block
+			time.Sleep(time.Hour)
+
+			if marshalled, err = json.Marshal(block); err != nil {
+				log.Printf("failed to marshal block: %v\n", err)
+				goto Sleep
+			}
+
+			if err = json.Unmarshal(marshalled, &blockData); err != nil {
+				log.Printf("failed to unmarshal block: %v\n", err)
+				goto Sleep
+			}
+
+			log.Println(blockData)
+
+			for k, v := range blockData.Transactions() {
+				log.Printf("%v: %v\n", k, v)
+			}
 
 			prevBlockNumber = currentBlockNumber
+		Sleep:
+			time.Sleep(time.Second * 5)
 		}
 	})
 

@@ -5,7 +5,7 @@ import (
 	"log"
 )
 
-func (c *Client) CurrentBlock() (uint64, error) {
+func (c *Client) CurrentBlockNumber() (uint64, error) {
 	var (
 		resp        []byte
 		err         error
