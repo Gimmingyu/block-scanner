@@ -1,4 +1,4 @@
-package query
+package repository
 
 import (
 	"context"
@@ -26,4 +26,19 @@ type MongoRepository[T Collection] interface {
 
 func NewMongoRepository[T Collection](conn *mongo.Collection) MongoRepository[T] {
 	return &mongoRepository[T]{conn}
+}
+
+type Table interface {
+}
+
+type SQLRepository[T Table] interface {
+}
+
+type GORMRepository[T Table] interface {
+}
+
+type EntRepository[T Table] interface {
+}
+
+type XORMRepository[T Table] interface {
 }
