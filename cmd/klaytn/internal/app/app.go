@@ -2,12 +2,14 @@ package app
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"golang.org/x/sync/errgroup"
 	"log"
 	"math/big"
 	"scanner/cmd/klaytn/internal/container"
 	"scanner/internal/evm"
+	"scanner/internal/models"
 	"time"
 )
 
@@ -37,6 +39,8 @@ func (a *App) Scan() error {
 		err                      error
 		client                   evm.Service
 		block                    map[string]interface{}
+		marshalled               []byte
+		blockData                = new(models.KlaytnBlockData)
 	)
 
 	client = a.Container().Client()
@@ -62,7 +66,20 @@ func (a *App) Scan() error {
 				goto Sleep
 			}
 
-			log.Println(block)
+			if marshalled, err = json.Marshal(block); err != nil {
+				fmt.Printf("failed to marshal block: %v\n", err)
+				goto Sleep
+			}
+
+			if err = json.Unmarshal(marshalled, &blockData); err != nil {
+				fmt.Printf("failed to unmarshal block data: %v\n", err)
+				goto Sleep
+			}
+
+			for k, v := range blockData.Transactions {
+				log.Printf("%v: %v\n", k, v)
+			}
+
 			//fmt.Printf("block number: %v\n", block.NumberU64())
 			// TODO: process block
 

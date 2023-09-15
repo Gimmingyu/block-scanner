@@ -7,6 +7,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"log"
 	"math/big"
 )
 
@@ -39,12 +40,16 @@ func (s *EthereumService) GetBlockByNumber(number *big.Int) (map[string]interfac
 		return nil, err
 	}
 
+	log.Println(block)
+
 	marshalled, err = json.Marshal(block)
 	if err != nil {
 		return nil, err
 	}
 
 	err = json.Unmarshal(marshalled, &unmarshalled)
+
+	log.Println(unmarshalled)
 	if err != nil {
 		return nil, err
 	}
