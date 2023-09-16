@@ -135,6 +135,6 @@ func (q *queryBuilder) Build() (string, []interface{}, error) {
 	return q.query, q.args, nil
 }
 
-func Query() QueryBuilder {
+func NewQueryBuilder() QueryBuilder {
 	return new(queryBuilder)
 }
