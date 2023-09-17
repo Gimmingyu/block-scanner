@@ -6,24 +6,26 @@ import (
 
 func FindByID[T Table](tx *gorm.DB, id uint) (*T, error) {
 	var (
-		result T
+		result = new(T)
+		table  T
 		err    error
 	)
 
-	if err = tx.Table(result.Table()).Where("id = ?", id).First(&result).Error; err != nil {
+	if err = tx.Table(table.Table()).Where("id = ?", id).First(&result).Error; err != nil {
 		return nil, err
 	}
 
-	return &result, nil
+	return result, nil
 }
 
 func FindOne[T Table](tx *gorm.DB, where string, args ...interface{}) (*T, error) {
 	var (
 		result = new(T)
+		table  T
 		err    error
 	)
 
-	if err = tx.Table((*result).Table()).Where(where, args).First(&result).Error; err != nil {
+	if err = tx.Table(table.Table()).Where(where, args).First(&result).Error; err != nil {
 		return nil, err
 	}
 
@@ -98,6 +100,48 @@ func Delete[T Table](tx *gorm.DB, filter map[string]interface{}) error {
 
 	err = tx.Where(filter).Delete(&table).Error
 	return err
+}
+
+func Count[T Table](tx *gorm.DB, where string, args ...interface{}) (int64, error) {
+	var (
+		table T
+		count int64
+		err   error
+	)
+
+	if err = tx.Table(table.Table()).Where(where, args).Count(&count).Error; err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}
+
+func FindWithJoin[T Table](tx *gorm.DB, join, where string, args ...interface{}) ([]*T, error) {
+	var (
+		result []*T
+		table  T
+		err    error
+	)
+
+	if err = tx.Table(table.Table()).Joins(join).Where(where, args).Find(&result).Error; err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func FindWithSubQuery[T Table](tx *gorm.DB, subQuery, where string, args ...interface{}) ([]*T, error) {
+	var (
+		result []*T
+		table  T
+		err    error
+	)
+
+	if err = tx.Table(table.Table()).Where(where, args).Where(subQuery).Find(&result).Error; err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 func Query(tx *gorm.DB, query string, args []interface{}, dest interface{}) error {
