@@ -3,7 +3,6 @@ package repository
 import (
 	"database/sql"
 	"fmt"
-	"strings"
 )
 
 func FindByID[T Table](tx *sql.Tx, id uint) (*T, error) {
@@ -66,28 +65,19 @@ func FindMany[T Table](tx *sql.Tx, where string, args ...interface{}) ([]*T, err
 	return results, nil
 }
 
-func Insert[T Table](tx *sql.Tx, columns []string, values ...interface{}) error {
+func Insert[T Table](tx *sql.Tx, model T) error {
 	var (
-		table       T
-		err         error
-		query       string
-		placeholder = make([]string, len(columns))
+		table T
+		err   error
+		query string
 	)
-
-	for i := range placeholder {
-		placeholder[i] = "?"
-	}
 
 	query = fmt.Sprintf("INSERT INTO %s (%s) VALUES ?",
 		table.Table(),
-		strings.Join(columns, ", "),
-		strings.Join(placeholder, ", "),
+		model.Columns(),
+		model.Values(),
 	)
 
-	_, err = tx.Exec(query, values...)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	_, err = tx.Exec(query)
+	return err
 }
