@@ -18,28 +18,28 @@ func GormFindByID[T Table](tx *gorm.DB, id uint) (*T, error) {
 	return result, nil
 }
 
-func GormFindOne[T Table](tx *gorm.DB, where string, args ...interface{}) (*T, error) {
+func GormFindOne[T Table](tx *gorm.DB, where map[string]interface{}) (*T, error) {
 	var (
 		result = new(T)
 		table  T
 		err    error
 	)
 
-	if err = tx.Table(table.Table()).Where(where, args).First(&result).Error; err != nil {
+	if err = tx.Table(table.Table()).Where(where).First(&result).Error; err != nil {
 		return nil, tx.Rollback().Error
 	}
 
 	return result, nil
 }
 
-func GormFindMany[T Table](tx *gorm.DB, where string, args ...interface{}) ([]*T, error) {
+func GormFindMany[T Table](tx *gorm.DB, where map[string]interface{}) ([]*T, error) {
 	var (
 		result []*T
 		table  T
 		err    error
 	)
 
-	if err = tx.Table(table.Table()).Where(where, args).Find(&result).Error; err != nil {
+	if err = tx.Table(table.Table()).Where(where).Find(&result).Error; err != nil {
 		return nil, tx.Rollback().Error
 	}
 
@@ -102,42 +102,42 @@ func GormDelete[T Table](tx *gorm.DB, filter map[string]interface{}) error {
 	return err
 }
 
-func GormCount[T Table](tx *gorm.DB, where string, args ...interface{}) (int64, error) {
+func GormCount[T Table](tx *gorm.DB, where map[string]interface{}) (int64, error) {
 	var (
 		table T
 		count int64
 		err   error
 	)
 
-	if err = tx.Table(table.Table()).Where(where, args).Count(&count).Error; err != nil {
+	if err = tx.Table(table.Table()).Where(where).Count(&count).Error; err != nil {
 		return 0, err
 	}
 
 	return count, nil
 }
 
-func GormFindWithJoin[T Table](tx *gorm.DB, join, where string, args ...interface{}) ([]*T, error) {
+func GormFindWithJoin[T Table](tx *gorm.DB, join string, where map[string]interface{}) ([]*T, error) {
 	var (
 		result []*T
 		table  T
 		err    error
 	)
 
-	if err = tx.Table(table.Table()).Joins(join).Where(where, args).Find(&result).Error; err != nil {
+	if err = tx.Table(table.Table()).Joins(join).Where(where).Find(&result).Error; err != nil {
 		return nil, tx.Rollback().Error
 	}
 
 	return result, nil
 }
 
-func GormFindWithSubQuery[T Table](tx *gorm.DB, subQuery, where string, args ...interface{}) ([]*T, error) {
+func GormFindWithSubQuery[T Table](tx *gorm.DB, subQuery, where map[string]interface{}) ([]*T, error) {
 	var (
 		result []*T
 		table  T
 		err    error
 	)
 
-	if err = tx.Table(table.Table()).Where(where, args).Where(subQuery).Find(&result).Error; err != nil {
+	if err = tx.Table(table.Table()).Where(where).Where(subQuery).Find(&result).Error; err != nil {
 		return nil, tx.Rollback().Error
 	}
 
@@ -145,9 +145,9 @@ func GormFindWithSubQuery[T Table](tx *gorm.DB, subQuery, where string, args ...
 }
 
 func GormQuery(tx *gorm.DB, query string, args []interface{}, dest interface{}) error {
-	return tx.Raw(query, args).Find(&dest).Error
+	return tx.Raw(query, args...).Find(&dest).Error
 }
 
 func GormExec(tx *gorm.DB, query string, args ...interface{}) error {
-	return tx.Exec(query, args).Error
+	return tx.Exec(query, args...).Error
 }
