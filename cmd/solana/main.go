@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 	"os"
+	"scanner/internal/blockchain"
 	"scanner/internal/env"
-	"scanner/internal/solana"
 )
 
 func init() {
@@ -14,7 +14,7 @@ func init() {
 }
 
 func main() {
-	client := solana.NewClient(os.Getenv("SOLANA_NODE_ENDPOINT"))
+	client := blockchain.NewSolanaService(os.Getenv("SOLANA_NODE_ENDPOINT"))
 
 	blockNumber, err := client.CurrentBlockNumber()
 	if err != nil {
@@ -24,7 +24,7 @@ func main() {
 	log.Println("Current block:", blockNumber)
 	log.Println(err)
 
-	block, err := client.GetBlockByNumber(blockNumber, &solana.GetBlockOps{
+	block, err := client.GetBlockByNumber(blockNumber, &blockchain.GetBlockOps{
 		Encoding:                       "jsonParsed",
 		MaxSupportedTransactionVersion: 0,
 		TransactionDetails:             "full",

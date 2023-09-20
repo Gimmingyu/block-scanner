@@ -5,8 +5,8 @@ import (
 	"os"
 	"scanner/cmd/ethereum/internal/app"
 	"scanner/cmd/ethereum/internal/container"
+	"scanner/internal/blockchain"
 	"scanner/internal/env"
-	"scanner/internal/evm"
 )
 
 func init() {
@@ -18,7 +18,7 @@ func init() {
 func main() {
 
 	endpoint := os.Getenv("ETHEREUM_NODE_ENDPOINT")
-	ethClient, err := evm.NewEthClient(endpoint)
+	ethClient, err := blockchain.NewEthClient(endpoint)
 	if err != nil {
 		log.Panicf("failed to create ethereum client: %v", err)
 	}

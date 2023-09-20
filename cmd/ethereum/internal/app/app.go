@@ -9,7 +9,7 @@ import (
 	"log"
 	"math/big"
 	"scanner/cmd/ethereum/internal/container"
-	"scanner/internal/evm"
+	"scanner/internal/blockchain"
 	"time"
 )
 
@@ -33,7 +33,7 @@ func (a *App) Scan() error {
 		currentBlockNumber       uint64
 		bigIntCurrentBlockNumber *big.Int
 		err                      error
-		client                   evm.Service
+		client                   blockchain.Service
 		block                    map[string]interface{}
 		marshalled               []byte
 		blockData                *types.Block

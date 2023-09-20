@@ -5,9 +5,8 @@ import (
 	"os"
 	"scanner/cmd/klaytn/internal/app"
 	"scanner/cmd/klaytn/internal/container"
-
+	"scanner/internal/blockchain"
 	"scanner/internal/env"
-	"scanner/internal/evm"
 )
 
 func init() {
@@ -19,12 +18,12 @@ func init() {
 func main() {
 
 	endpoint := os.Getenv("KLAYTN_NODE_ENDPOINT")
-	ethClient, err := evm.NewEthClient(endpoint)
+	ethClient, err := blockchain.NewEthClient(endpoint)
 	if err != nil {
 		log.Panicf("failed to create klaytn client: %v", err)
 	}
 
-	c := container.NewContainer(evm.NewKlaytnService(ethClient.Client()))
+	c := container.NewContainer(blockchain.NewKlaytnService(ethClient.Client()))
 	a := app.NewApp(c)
 
 	if err := a.Run(); err != nil {

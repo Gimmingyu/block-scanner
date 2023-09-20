@@ -1,15 +1,17 @@
 package container
 
-import "scanner/internal/evm"
+import (
+	"scanner/internal/blockchain"
+)
 
 type Container struct {
-	client evm.Service
+	client *blockchain.EthereumService
 }
 
-func NewContainer(client evm.Service) *Container {
+func NewContainer(client *blockchain.EthereumService) *Container {
 	return &Container{client: client}
 }
 
-func (c *Container) Client() evm.Service {
+func (c *Container) Client() *blockchain.EthereumService {
 	return c.client
 }

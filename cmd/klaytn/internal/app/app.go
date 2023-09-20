@@ -8,7 +8,7 @@ import (
 	"log"
 	"math/big"
 	"scanner/cmd/klaytn/internal/container"
-	"scanner/internal/evm"
+	"scanner/internal/blockchain"
 	"scanner/internal/models"
 	"time"
 )
@@ -37,7 +37,7 @@ func (a *App) Scan() error {
 		currentBlockNumber       uint64
 		bigIntCurrentBlockNumber *big.Int
 		err                      error
-		client                   evm.Service
+		client                   blockchain.Service
 		block                    map[string]interface{}
 		marshalled               []byte
 		blockData                = new(models.KlaytnBlockData)
