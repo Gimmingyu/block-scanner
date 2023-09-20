@@ -1,24 +1,27 @@
-package app
+package internal
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/ethereum/go-ethereum/core/types"
 	"golang.org/x/sync/errgroup"
 	"log"
 	"math/big"
-	"scanner/cmd/ethereum/internal/container"
 	"scanner/internal/blockchain"
+	"scanner/internal/models"
 	"time"
 )
 
 type App struct {
-	container *container.Container
+	container *Container
 }
 
-func New(c *container.Container) *App {
-	return &App{container: c}
+func NewApp(container *Container) *App {
+	return &App{container: container}
+}
+
+func (a *App) Container() *Container {
+	return a.container
 }
 
 func (a *App) Run() error {
@@ -33,13 +36,13 @@ func (a *App) Scan() error {
 		currentBlockNumber       uint64
 		bigIntCurrentBlockNumber *big.Int
 		err                      error
-		client                   blockchain.Service
+		client                   *blockchain.KlaytnService
 		block                    map[string]interface{}
 		marshalled               []byte
-		blockData                *types.Block
+		blockData                = new(models.KlaytnBlockData)
 	)
 
-	client = a.container.Client()
+	client = a.Container().Client()
 	group, _ = errgroup.WithContext(context.Background())
 
 	group.Go(func() error {
@@ -50,39 +53,37 @@ func (a *App) Scan() error {
 				goto Sleep
 			}
 
-			if prevBlockNumber == currentBlockNumber {
-				continue
-			}
-
 			log.Println(currentBlockNumber)
+			if prevBlockNumber == currentBlockNumber {
+				goto Sleep
+			}
 
 			bigIntCurrentBlockNumber = big.NewInt(int64(currentBlockNumber))
 			block, err = client.GetBlockByNumber(bigIntCurrentBlockNumber)
 			if err != nil {
-				log.Printf("failed to get block by number: %v\n", err)
+				fmt.Printf("failed to get block by number: %v\n", err)
 				goto Sleep
 			}
 
-			log.Println(block)
-			time.Sleep(time.Hour)
-
 			if marshalled, err = json.Marshal(block); err != nil {
-				log.Printf("failed to marshal block: %v\n", err)
+				fmt.Printf("failed to marshal block: %v\n", err)
 				goto Sleep
 			}
 
 			if err = json.Unmarshal(marshalled, &blockData); err != nil {
-				log.Printf("failed to unmarshal block: %v\n", err)
+				fmt.Printf("failed to unmarshal block data: %v\n", err)
 				goto Sleep
 			}
 
-			log.Println(blockData)
-
-			for k, v := range blockData.Transactions() {
+			for k, v := range blockData.Transactions {
 				log.Printf("%v: %v\n", k, v)
 			}
 
+			//fmt.Printf("block number: %v\n", block.NumberU64())
+			// TODO: process block
+
 			prevBlockNumber = currentBlockNumber
+
 		Sleep:
 			time.Sleep(time.Second * 5)
 		}

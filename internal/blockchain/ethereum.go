@@ -93,6 +93,6 @@ func (s *EthereumService) TransactionReceipt(ctx context.Context, hash common.Ha
 	return s.client.TransactionReceipt(ctx, hash)
 }
 
-func New(client *ethclient.Client) *EthereumService {
+func NewEthereumService(client *ethclient.Client) *EthereumService {
 	return &EthereumService{client: client}
 }

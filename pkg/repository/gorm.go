@@ -4,7 +4,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func GormFindByID[T Table](tx *gorm.DB, id uint) (*T, error) {
+func FindByID[T Table](tx *gorm.DB, id uint) (*T, error) {
 	var (
 		result = new(T)
 		table  T
@@ -18,7 +18,7 @@ func GormFindByID[T Table](tx *gorm.DB, id uint) (*T, error) {
 	return result, nil
 }
 
-func GormFindOne[T Table](tx *gorm.DB, where map[string]interface{}) (*T, error) {
+func FindOne[T Table](tx *gorm.DB, where map[string]interface{}) (*T, error) {
 	var (
 		result = new(T)
 		table  T
@@ -32,7 +32,7 @@ func GormFindOne[T Table](tx *gorm.DB, where map[string]interface{}) (*T, error)
 	return result, nil
 }
 
-func GormFindMany[T Table](tx *gorm.DB, where map[string]interface{}) ([]*T, error) {
+func FindMany[T Table](tx *gorm.DB, where map[string]interface{}) ([]*T, error) {
 	var (
 		result []*T
 		table  T
@@ -46,7 +46,7 @@ func GormFindMany[T Table](tx *gorm.DB, where map[string]interface{}) ([]*T, err
 	return result, nil
 }
 
-func GormInsert[T Table](tx *gorm.DB, model *T) error {
+func Insert[T Table](tx *gorm.DB, model *T) error {
 	var (
 		table T
 		err   error
@@ -59,7 +59,7 @@ func GormInsert[T Table](tx *gorm.DB, model *T) error {
 	return nil
 }
 
-func GormInsertMany[T Table](tx *gorm.DB, models []*T, batchSize int) error {
+func InsertMany[T Table](tx *gorm.DB, models []*T, batchSize int) error {
 	var (
 		table T
 		err   error
@@ -72,7 +72,7 @@ func GormInsertMany[T Table](tx *gorm.DB, models []*T, batchSize int) error {
 	return nil
 }
 
-func GormUpdate[T Table](tx *gorm.DB, filter, value map[string]interface{}) error {
+func Update[T Table](tx *gorm.DB, filter, value map[string]interface{}) error {
 	var (
 		table T
 		err   error
@@ -82,7 +82,7 @@ func GormUpdate[T Table](tx *gorm.DB, filter, value map[string]interface{}) erro
 	return err
 }
 
-func GormUpdateColumn[T Table](tx *gorm.DB, filter map[string]interface{}, column string, value interface{}) error {
+func UpdateColumn[T Table](tx *gorm.DB, filter map[string]interface{}, column string, value interface{}) error {
 	var (
 		table T
 		err   error
@@ -92,7 +92,7 @@ func GormUpdateColumn[T Table](tx *gorm.DB, filter map[string]interface{}, colum
 	return err
 }
 
-func GormDelete[T Table](tx *gorm.DB, filter map[string]interface{}) error {
+func Delete[T Table](tx *gorm.DB, filter map[string]interface{}) error {
 	var (
 		table = new(T)
 		err   error
@@ -102,7 +102,7 @@ func GormDelete[T Table](tx *gorm.DB, filter map[string]interface{}) error {
 	return err
 }
 
-func GormCount[T Table](tx *gorm.DB, where map[string]interface{}) (int64, error) {
+func Count[T Table](tx *gorm.DB, where map[string]interface{}) (int64, error) {
 	var (
 		table T
 		count int64
@@ -116,7 +116,7 @@ func GormCount[T Table](tx *gorm.DB, where map[string]interface{}) (int64, error
 	return count, nil
 }
 
-func GormFindWithJoin[T Table](tx *gorm.DB, join string, where map[string]interface{}) ([]*T, error) {
+func FindWithJoin[T Table](tx *gorm.DB, join string, where map[string]interface{}) ([]*T, error) {
 	var (
 		result []*T
 		table  T
@@ -130,7 +130,7 @@ func GormFindWithJoin[T Table](tx *gorm.DB, join string, where map[string]interf
 	return result, nil
 }
 
-func GormFindWithSubQuery[T Table](tx *gorm.DB, subQuery, where map[string]interface{}) ([]*T, error) {
+func FindWithSubQuery[T Table](tx *gorm.DB, subQuery, where map[string]interface{}) ([]*T, error) {
 	var (
 		result []*T
 		table  T
@@ -144,10 +144,10 @@ func GormFindWithSubQuery[T Table](tx *gorm.DB, subQuery, where map[string]inter
 	return result, nil
 }
 
-func GormQuery(tx *gorm.DB, query string, args []interface{}, dest interface{}) error {
+func Query(tx *gorm.DB, query string, args []interface{}, dest interface{}) error {
 	return tx.Raw(query, args...).Find(&dest).Error
 }
 
-func GormExec(tx *gorm.DB, query string, args ...interface{}) error {
+func Exec(tx *gorm.DB, query string, args ...interface{}) error {
 	return tx.Exec(query, args...).Error
 }

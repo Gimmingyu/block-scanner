@@ -1,4 +1,4 @@
-package container
+package internal
 
 import (
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -6,13 +6,13 @@ import (
 )
 
 type Container struct {
-	client blockchain.Service
+	client *blockchain.EthereumService
 }
 
-func (c *Container) Client() blockchain.Service {
+func (c *Container) Client() *blockchain.EthereumService {
 	return c.client
 }
 
 func NewContainer(client *ethclient.Client) *Container {
-	return &Container{client: blockchain.New(client)}
+	return &Container{client: blockchain.NewEthereumService(client)}
 }
