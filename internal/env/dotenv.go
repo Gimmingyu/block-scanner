@@ -1,7 +1,6 @@
 package env
 
 import (
-	"fmt"
 	"os"
 	"strings"
 )
@@ -11,31 +10,28 @@ func LoadEnv(filename string) error {
 	if err != nil {
 		return err
 	}
-	
+
 	var env = make(map[string]string)
-	
+
 	for _, line := range strings.Split(string(content), "\n") {
 		if line == "" {
 			continue
 		}
-		
-		split := strings.Split(line, "=")
-		if len(split) != 2 {
-			return fmt.Errorf("invalid line at: %v", line)
+
+		before, after, ok := strings.Cut(line, "=")
+		if !ok {
+			continue
 		}
-		
-		key := split[0]
-		value := split[1]
-		
-		env[key] = value
+
+		env[before] = after
 	}
-	
+
 	for k, v := range env {
 		err := os.Setenv(k, v)
 		if err != nil {
 			panic(err)
 		}
 	}
-	
+
 	return nil
 }

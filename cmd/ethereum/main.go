@@ -6,6 +6,9 @@ import (
 	"scanner/cmd/ethereum/internal"
 	"scanner/internal/blockchain"
 	"scanner/internal/env"
+	"scanner/internal/models"
+	"scanner/pkg/connection"
+	"scanner/pkg/repository"
 	"time"
 )
 
@@ -23,7 +26,11 @@ func main() {
 		log.Panicf("failed to create ethereum client: %v", err)
 	}
 
-	container := internal.NewContainer(ethClient)
+	mongoClient := connection.NewMongoConnection(os.Getenv("MONGO_URI"))
+
+	transactionRepository := repository.NewMongoRepository[models.EthereumTransaction](mongoClient.Database("ethereum").Collection("transactions"))
+
+	container := internal.NewContainer(ethClient, transactionRepository)
 	app := internal.New(container)
 	app.SetInterval(time.Minute)
 	if err = app.Scan(); err != nil {

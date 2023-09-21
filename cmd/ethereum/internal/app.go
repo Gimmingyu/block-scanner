@@ -1,10 +1,13 @@
 package internal
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/core/types"
 	"log"
 	"math/big"
+	"scanner/internal/models"
 	"time"
 )
 
@@ -62,8 +65,27 @@ func (a *App) Scan() error {
 				continue
 			}
 
-			for k, v := range block.Transactions() {
-				log.Printf("%v: %v\n", k, v)
+			var marshalled []byte
+			var transactions []*models.EthereumTransaction
+			for _, transaction := range block.Transactions() {
+				marshalled, _err = transaction.MarshalJSON()
+				if _err != nil {
+					continue
+				}
+
+				document := new(models.EthereumTransaction)
+				_err = json.Unmarshal(marshalled, &document)
+				if _err != nil {
+					continue
+				}
+
+				transactions = append(transactions, document)
+			}
+
+			if _err = a.container.repository.InsertMany(context.TODO(), transactions); _err != nil {
+				log.Printf("failed to insert transactions: %v\n", _err)
+				retryCount++
+				continue
 			}
 
 			prevBlockNumber = currentBlockNumber
