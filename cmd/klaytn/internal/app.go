@@ -1,93 +1,90 @@
 package internal
 
 import (
-	"context"
-	"encoding/json"
 	"fmt"
-	"golang.org/x/sync/errgroup"
 	"log"
 	"math/big"
 	"scanner/internal/blockchain"
-	"scanner/internal/models"
 	"time"
 )
 
 type App struct {
 	container *Container
+	interval  time.Duration
 }
 
 func NewApp(container *Container) *App {
 	return &App{container: container}
 }
 
+func (a *App) SetInterval(interval time.Duration) {
+	a.interval = interval
+}
+
 func (a *App) Container() *Container {
 	return a.container
 }
 
-func (a *App) Run() error {
-	return a.Scan()
-}
-
 func (a *App) Scan() error {
-	var (
-		group                    *errgroup.Group
-		_                        context.Context
-		prevBlockNumber          uint64
-		currentBlockNumber       uint64
-		bigIntCurrentBlockNumber *big.Int
-		err                      error
-		client                   *blockchain.KlaytnService
-		block                    map[string]interface{}
-		marshalled               []byte
-		blockData                = new(models.KlaytnBlockData)
-	)
 
-	client = a.Container().Client()
-	group, _ = errgroup.WithContext(context.Background())
+	var client = a.container.Client()
+	var err = make(chan error)
+	defer close(err)
 
-	group.Go(func() error {
+	go func(ch chan error) {
+		var retryCount = 0
 		for {
-			currentBlockNumber, err = client.CurrentBlockNumber()
-			if err != nil {
-				fmt.Printf("failed to get current block number: %v\n", err)
-				goto Sleep
+			if retryCount > 10 {
+				ch <- fmt.Errorf("failed to get current block number after 10 retries")
+				return
 			}
 
-			log.Println(currentBlockNumber)
+			var (
+				prevBlockNumber          = uint64(0)
+				currentBlockNumber, _err = client.CurrentBlockNumber()
+			)
+
+			if _err != nil {
+				fmt.Printf("failed to get current block number: %v\n", _err)
+				retryCount++
+				continue
+			}
+
 			if prevBlockNumber == currentBlockNumber {
-				goto Sleep
+				retryCount++
+				continue
 			}
 
-			bigIntCurrentBlockNumber = big.NewInt(int64(currentBlockNumber))
-			block, err = client.GetBlockByNumber(bigIntCurrentBlockNumber)
-			if err != nil {
-				fmt.Printf("failed to get block by number: %v\n", err)
-				goto Sleep
+			var (
+				bigIntCurrentBlockNumber = big.NewInt(int64(currentBlockNumber))
+				block                    *blockchain.KlaytnBlock
+			)
+			block, _err = client.GetBlockByNumber(bigIntCurrentBlockNumber)
+			if _err != nil {
+				log.Printf("failed to get block by number: %v\n", _err)
+				retryCount++
+				continue
 			}
 
-			if marshalled, err = json.Marshal(block); err != nil {
-				fmt.Printf("failed to marshal block: %v\n", err)
-				goto Sleep
+			for _, v := range block.Transactions {
+				log.Println("HASH", v.Hash)
+				log.Println("BLOCK NUMBER", v.BlockNumber)
+				log.Println("BLOCK HASH", v.BlockHash)
+				log.Println("TRANSACTION INDEX", v.TransactionIndex)
+				log.Println("GAS", v.Gas)
+				log.Println("GASPRICE", v.GasPrice)
+				log.Println("VALUE", v.Value)
+				log.Println("INPUT", v.Input)
+				log.Println("FROM", v.From)
+				log.Println("TO", v.To)
+				log.Println("NONCE", v.Nonce)
 			}
-
-			if err = json.Unmarshal(marshalled, &blockData); err != nil {
-				fmt.Printf("failed to unmarshal block data: %v\n", err)
-				goto Sleep
-			}
-
-			for k, v := range blockData.Transactions {
-				log.Printf("%v: %v\n", k, v)
-			}
-
-			//fmt.Printf("block number: %v\n", block.NumberU64())
-			// TODO: process block
 
 			prevBlockNumber = currentBlockNumber
-
-		Sleep:
-			time.Sleep(time.Second * 5)
+			retryCount = 0
+			time.Sleep(a.interval)
 		}
-	})
+	}(err)
 
-	return group.Wait()
+	return <-err
 }

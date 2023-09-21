@@ -2,12 +2,10 @@ package blockchain
 
 import (
 	"context"
-	"encoding/json"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"log"
 	"math/big"
 )
 
@@ -27,34 +25,12 @@ func (s *EthereumService) CurrentBlockNumber() (uint64, error) {
 	return s.client.BlockNumber(context.Background())
 }
 
-func (s *EthereumService) GetBlockByNumber(number *big.Int) (map[string]interface{}, error) {
-	var (
-		block        *types.Block
-		unmarshalled map[string]interface{}
-		marshalled   []byte
-		err          error
-	)
-
-	block, err = s.client.BlockByNumber(context.Background(), number)
+func (s *EthereumService) GetBlockByNumber(number *big.Int) (*types.Block, error) {
+	var block, err = s.client.BlockByNumber(context.Background(), number)
 	if err != nil {
 		return nil, err
 	}
-
-	log.Println(block)
-
-	marshalled, err = json.Marshal(block)
-	if err != nil {
-		return nil, err
-	}
-
-	err = json.Unmarshal(marshalled, &unmarshalled)
-
-	log.Println(unmarshalled)
-	if err != nil {
-		return nil, err
-	}
-
-	return unmarshalled, nil
+	return block, nil
 }
 
 func (s *EthereumService) GetBlockByHash(hash common.Hash) (*types.Block, error) {

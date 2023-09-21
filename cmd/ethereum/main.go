@@ -6,6 +6,7 @@ import (
 	"scanner/cmd/ethereum/internal"
 	"scanner/internal/blockchain"
 	"scanner/internal/env"
+	"time"
 )
 
 func init() {
@@ -24,8 +25,8 @@ func main() {
 
 	container := internal.NewContainer(ethClient)
 	app := internal.New(container)
-
-	if err := app.Scan(); err != nil {
+	app.SetInterval(time.Minute)
+	if err = app.Scan(); err != nil {
 		log.Panicf("failed to run ethereum scanner: %v", err)
 	}
 }

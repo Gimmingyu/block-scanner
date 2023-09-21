@@ -6,6 +6,7 @@ import (
 	"scanner/cmd/klaytn/internal"
 	"scanner/internal/blockchain"
 	"scanner/internal/env"
+	"time"
 )
 
 func init() {
@@ -22,10 +23,11 @@ func main() {
 		log.Panicf("failed to create klaytn client: %v", err)
 	}
 
-	c := internal.NewContainer(blockchain.NewKlaytnService(ethClient.Client()))
-	a := internal.NewApp(c)
+	container := internal.NewContainer(blockchain.NewKlaytnService(ethClient.Client()))
+	app := internal.NewApp(container)
+	app.SetInterval(time.Minute)
 
-	if err := a.Run(); err != nil {
+	if err := app.Scan(); err != nil {
 		log.Panicf("failed to run klaytn scanner: %v", err)
 	}
 }
