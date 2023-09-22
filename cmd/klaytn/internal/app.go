@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"math/big"
-	"scanner/internal/blockchain"
+	"scanner/pkg/blockchain"
 	"time"
 )
 

@@ -1,7 +1,6 @@
 package models
 
 type KlaytnBlockData struct {
-	ID              string             `json:"ID,omitempty" bson:"ID"`
 	ReceiptsRoot    string             `json:"receiptsRoot,omitempty" bson:"receiptsRoot"`
 	Timestamp       string             `json:"timestamp,omitempty" bson:"timestamp"`
 	ExtraData       string             `json:"extraData,omitempty" bson:"extraData"`
@@ -17,7 +16,6 @@ type KlaytnBlockData struct {
 }
 
 type KlaytnTransaction struct {
-	ID                 string     `json:"ID,omitempty" bson:"ID"`
 	From               string     `json:"from,omitempty" bson:"from"`
 	Input              string     `json:"input,omitempty" bson:"input"`
 	To                 string     `json:"to,omitempty" bson:"to"`

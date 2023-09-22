@@ -4,8 +4,11 @@ import (
 	"log"
 	"os"
 	"scanner/cmd/klaytn/internal"
-	"scanner/internal/blockchain"
-	"scanner/internal/env"
+	"scanner/internal/models"
+	blockchain2 "scanner/pkg/blockchain"
+	"scanner/pkg/connection"
+	"scanner/pkg/env"
+	"scanner/pkg/repository"
 	"time"
 )
 
@@ -18,16 +21,18 @@ func init() {
 func main() {
 
 	endpoint := os.Getenv("KLAYTN_NODE_ENDPOINT")
-	ethClient, err := blockchain.NewEthClient(endpoint)
+	ethClient, err := blockchain2.NewEthClient(endpoint)
 	if err != nil {
 		log.Panicf("failed to create klaytn client: %v", err)
 	}
 
-	container := internal.NewContainer(blockchain.NewKlaytnService(ethClient.Client()))
+	mongoClient := connection.NewMongoConnection(os.Getenv("MONGO_URI"))
+	transactionRepository := repository.NewMongoRepository[models.KlaytnTransaction](mongoClient.Database("klaytn").Collection("transactions"))
+
+	container := internal.NewContainer(blockchain2.NewKlaytnService(ethClient.Client()), transactionRepository)
 	app := internal.NewApp(container)
 	app.SetInterval(time.Minute)
-
-	if err := app.Scan(); err != nil {
+	if err = app.Scan(); err != nil {
 		log.Panicf("failed to run klaytn scanner: %v", err)
 	}
 }

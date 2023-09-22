@@ -14,7 +14,7 @@ type AccessTuple struct {
 
 type EthereumTransaction struct {
 	Type                 string         `json:"type" bson:"type"`
-	ChainId              string         `json:"chainId" bson:"chainId"`
+	ChainID              string         `json:"chainID" bson:"chainID"`
 	Nonce                string         `json:"nonce" bson:"nonce"`
 	To                   string         `json:"to" bson:"to"`
 	Gas                  string         `json:"gas" bson:"gas"`

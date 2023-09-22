@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 	"os"
-	"scanner/internal/blockchain"
-	"scanner/internal/env"
+	"scanner/pkg/blockchain"
+	"scanner/pkg/env"
 )
 
 func init() {
