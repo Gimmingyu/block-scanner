@@ -29,16 +29,8 @@ func NewMongoRepository[T Collection](conn *mongo.Collection) MongoRepository[T]
 }
 
 type Table interface {
-}
-
-type SQLRepository[T Table] interface {
-}
-
-type GORMRepository[T Table] interface {
-}
-
-type EntRepository[T Table] interface {
-}
-
-type XORMRepository[T Table] interface {
+	Table() string
+	Alias() string
+	Columns() []string
+	Values() []interface{}
 }

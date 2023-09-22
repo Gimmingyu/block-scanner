@@ -3,7 +3,7 @@ package main
 import (
 	"scanner/cmd/api/internal/app"
 	"scanner/cmd/api/internal/container"
-	"scanner/internal/env"
+	"scanner/pkg/env"
 )
 
 func init() {

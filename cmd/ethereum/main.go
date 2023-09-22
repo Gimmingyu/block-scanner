@@ -3,10 +3,13 @@ package main
 import (
 	"log"
 	"os"
-	"scanner/cmd/ethereum/internal/app"
-	"scanner/cmd/ethereum/internal/container"
-	"scanner/internal/env"
-	"scanner/internal/evm"
+	"scanner/cmd/ethereum/internal"
+	"scanner/internal/models"
+	blockchain2 "scanner/pkg/blockchain"
+	"scanner/pkg/connection"
+	"scanner/pkg/env"
+	"scanner/pkg/repository"
+	"time"
 )
 
 func init() {
@@ -18,15 +21,18 @@ func init() {
 func main() {
 
 	endpoint := os.Getenv("ETHEREUM_NODE_ENDPOINT")
-	ethClient, err := evm.NewEthClient(endpoint)
+	ethClient, err := blockchain2.NewEthClient(endpoint)
 	if err != nil {
 		log.Panicf("failed to create ethereum client: %v", err)
 	}
 
-	c := container.NewContainer(ethClient)
-	a := app.New(c)
+	mongoClient := connection.NewMongoConnection(os.Getenv("MONGO_URI"))
+	transactionRepository := repository.NewMongoRepository[models.EthereumTransaction](mongoClient.Database("ethereum").Collection("transactions"))
 
-	if err := a.Run(); err != nil {
+	container := internal.NewContainer(blockchain2.NewEthereumService(ethClient), transactionRepository)
+	app := internal.New(container)
+	app.SetInterval(time.Minute)
+	if err = app.Scan(); err != nil {
 		log.Panicf("failed to run ethereum scanner: %v", err)
 	}
 }
