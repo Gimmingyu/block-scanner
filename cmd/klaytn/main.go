@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 	"scanner/cmd/klaytn/internal"
-	"scanner/internal/models"
+	"scanner/internal/documents"
 	blockchain2 "scanner/pkg/blockchain"
 	"scanner/pkg/connection"
 	"scanner/pkg/env"
@@ -27,7 +27,7 @@ func main() {
 	}
 
 	mongoClient := connection.NewMongoConnection(os.Getenv("MONGO_URI"))
-	transactionRepository := repository.NewMongoRepository[models.KlaytnTransaction](mongoClient.Database("klaytn").Collection("transactions"))
+	transactionRepository := repository.NewMongoRepository[documents.KlaytnTransaction](mongoClient.Database("klaytn").Collection("transactions"))
 
 	container := internal.NewContainer(blockchain2.NewKlaytnService(ethClient.Client()), transactionRepository)
 	app := internal.NewApp(container)

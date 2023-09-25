@@ -1,20 +1,20 @@
 package internal
 
 import (
-	"scanner/internal/models"
+	"scanner/internal/documents"
 	"scanner/pkg/blockchain"
 	"scanner/pkg/repository"
 )
 
 type Container struct {
 	client     *blockchain.EthereumService
-	repository repository.MongoRepository[models.EthereumTransaction]
+	repository repository.MongoRepository[documents.EthereumTransaction]
 }
 
 func (c *Container) Client() *blockchain.EthereumService {
 	return c.client
 }
 
-func NewContainer(client *blockchain.EthereumService, repo repository.MongoRepository[models.EthereumTransaction]) *Container {
+func NewContainer(client *blockchain.EthereumService, repo repository.MongoRepository[documents.EthereumTransaction]) *Container {
 	return &Container{client: client, repository: repo}
 }
