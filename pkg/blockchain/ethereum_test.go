@@ -4,9 +4,33 @@ import (
 	"context"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
-	"reflect"
+	"github.com/ethereum/go-ethereum/ethclient"
+	"math/big"
+	"os"
+	"scanner/pkg/env"
 	"testing"
 )
+
+var (
+	client       *ethclient.Client
+	testAccount  common.Address
+	testContract common.Address
+	err          error
+)
+
+func init() {
+	if err := env.LoadEnv(".test.env"); err != nil {
+		panic(err)
+	}
+
+	client, err = ethclient.Dial(os.Getenv("ETHEREUM_NODE_ENDPOINT"))
+	if err != nil {
+		panic(err)
+	}
+
+	testAccount = common.HexToAddress(os.Getenv("TEST_ACCOUNT"))
+	testContract = common.HexToAddress(os.Getenv("TEST_CONTRACT"))
+}
 
 func TestEthereumService_BalanceAt(t *testing.T) {
 	type fields struct {
@@ -17,27 +41,36 @@ func TestEthereumService_BalanceAt(t *testing.T) {
 		account     common.Address
 		blockNumber *big.Int
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
 		args    args
-		want    *big.Int
 		wantErr bool
 	}{
 		// TODO: Add test cases.
+		{
+			name: "TestEthereumService_BalanceAt",
+			fields: fields{
+				client: client,
+			},
+			args: args{
+				ctx:         context.Background(),
+				account:     testAccount,
+				blockNumber: new(big.Int).SetUint64(0),
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &EthereumService{
 				client: tt.fields.client,
 			}
-			got, err := s.BalanceAt(tt.args.ctx, tt.args.account, tt.args.blockNumber)
+			_, err = s.BalanceAt(tt.args.ctx, tt.args.account, tt.args.blockNumber)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("BalanceAt() error = %v, wantErr %v", err, tt.wantErr)
 				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("BalanceAt() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -56,23 +89,31 @@ func TestEthereumService_CodeAt(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    []byte
 		wantErr bool
 	}{
 		// TODO: Add test cases.
+		{
+			name: "TestEthereumService_CodeAt",
+			fields: fields{
+				client: client,
+			},
+			args: args{
+				ctx:         context.Background(),
+				contract:    testContract,
+				blockNumber: new(big.Int).SetUint64(18220110),
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &EthereumService{
 				client: tt.fields.client,
 			}
-			got, err := s.CodeAt(tt.args.ctx, tt.args.contract, tt.args.blockNumber)
+			_, err = s.CodeAt(tt.args.ctx, tt.args.contract, tt.args.blockNumber)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("CodeAt() error = %v, wantErr %v", err, tt.wantErr)
 				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("CodeAt() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -85,23 +126,26 @@ func TestEthereumService_CurrentBlockNumber(t *testing.T) {
 	tests := []struct {
 		name    string
 		fields  fields
-		want    uint64
 		wantErr bool
 	}{
 		// TODO: Add test cases.
+		{
+			name: "TestEthereumService_CurrentBlockNumber",
+			fields: fields{
+				client: client,
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &EthereumService{
 				client: tt.fields.client,
 			}
-			got, err := s.CurrentBlockNumber()
+			_, err := s.CurrentBlockNumber()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("CurrentBlockNumber() error = %v, wantErr %v", err, tt.wantErr)
 				return
-			}
-			if got != tt.want {
-				t.Errorf("CurrentBlockNumber() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -119,23 +163,33 @@ func TestEthereumService_EstimateGas(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    uint64
 		wantErr bool
 	}{
 		// TODO: Add test cases.
+		{
+			name: "TestEthereumService_EstimateGas",
+			fields: fields{
+				client: client,
+			},
+			args: args{
+				ctx: context.Background(),
+				call: ethereum.CallMsg{
+					From: testAccount,
+					To:   &testContract,
+				},
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &EthereumService{
 				client: tt.fields.client,
 			}
-			got, err := s.EstimateGas(tt.args.ctx, tt.args.call)
+			_, err := s.EstimateGas(tt.args.ctx, tt.args.call)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("EstimateGas() error = %v, wantErr %v", err, tt.wantErr)
 				return
-			}
-			if got != tt.want {
-				t.Errorf("EstimateGas() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -152,23 +206,29 @@ func TestEthereumService_GetBlockByHash(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    *types.Block
 		wantErr bool
 	}{
 		// TODO: Add test cases.
+		{
+			name: "TestEthereumService_GetBlockByHash",
+			fields: fields{
+				client: client,
+			},
+			args: args{
+				hash: common.HexToHash("0x41be2acf31b6b5265da905943ff8e67c392e210dc421ab66ba9856a937be281f"),
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &EthereumService{
 				client: tt.fields.client,
 			}
-			got, err := s.GetBlockByHash(tt.args.hash)
+			_, err := s.GetBlockByHash(tt.args.hash)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetBlockByHash() error = %v, wantErr %v", err, tt.wantErr)
 				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetBlockByHash() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -185,23 +245,29 @@ func TestEthereumService_GetBlockByNumber(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    *types.Block
 		wantErr bool
 	}{
 		// TODO: Add test cases.
+		{
+			name: "TestEthereumService_GetBlockByNumber",
+			fields: fields{
+				client: client,
+			},
+			args: args{
+				number: new(big.Int).SetUint64(18220110),
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &EthereumService{
 				client: tt.fields.client,
 			}
-			got, err := s.GetBlockByNumber(tt.args.number)
+			_, err := s.GetBlockByNumber(tt.args.number)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetBlockByNumber() error = %v, wantErr %v", err, tt.wantErr)
 				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetBlockByNumber() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -220,243 +286,31 @@ func TestEthereumService_NonceAt(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    uint64
 		wantErr bool
 	}{
 		// TODO: Add test cases.
+		{
+			name: "TestEthereumService_NonceAt",
+			fields: fields{
+				client: client,
+			},
+			args: args{
+				ctx:         context.Background(),
+				account:     testAccount,
+				blockNumber: new(big.Int).SetUint64(18220110),
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &EthereumService{
 				client: tt.fields.client,
 			}
-			got, err := s.NonceAt(tt.args.ctx, tt.args.account, tt.args.blockNumber)
+			_, err := s.NonceAt(tt.args.ctx, tt.args.account, tt.args.blockNumber)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NonceAt() error = %v, wantErr %v", err, tt.wantErr)
 				return
-			}
-			if got != tt.want {
-				t.Errorf("NonceAt() got = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestEthereumService_SendTransaction(t *testing.T) {
-	type fields struct {
-		client *ethclient.Client
-	}
-	type args struct {
-		ctx context.Context
-		tx  *types.Transaction
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			s := &EthereumService{
-				client: tt.fields.client,
-			}
-			if err := s.SendTransaction(tt.args.ctx, tt.args.tx); (err != nil) != tt.wantErr {
-				t.Errorf("SendTransaction() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-func TestEthereumService_SuggestGasPrice(t *testing.T) {
-	type fields struct {
-		client *ethclient.Client
-	}
-	type args struct {
-		ctx context.Context
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		want    *big.Int
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			s := &EthereumService{
-				client: tt.fields.client,
-			}
-			got, err := s.SuggestGasPrice(tt.args.ctx)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("SuggestGasPrice() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("SuggestGasPrice() got = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestEthereumService_SuggestGasTipCap(t *testing.T) {
-	type fields struct {
-		client *ethclient.Client
-	}
-	type args struct {
-		ctx context.Context
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		want    *big.Int
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			s := &EthereumService{
-				client: tt.fields.client,
-			}
-			got, err := s.SuggestGasTipCap(tt.args.ctx)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("SuggestGasTipCap() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("SuggestGasTipCap() got = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestEthereumService_TransactionByHash(t *testing.T) {
-	type fields struct {
-		client *ethclient.Client
-	}
-	type args struct {
-		ctx  context.Context
-		hash common.Hash
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		want    *types.Transaction
-		want1   bool
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			s := &EthereumService{
-				client: tt.fields.client,
-			}
-			got, got1, err := s.TransactionByHash(tt.args.ctx, tt.args.hash)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("TransactionByHash() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("TransactionByHash() got = %v, want %v", got, tt.want)
-			}
-			if got1 != tt.want1 {
-				t.Errorf("TransactionByHash() got1 = %v, want %v", got1, tt.want1)
-			}
-		})
-	}
-}
-
-func TestEthereumService_TransactionCount(t *testing.T) {
-	type fields struct {
-		client *ethclient.Client
-	}
-	type args struct {
-		ctx  context.Context
-		hash common.Hash
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		want    uint
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			s := &EthereumService{
-				client: tt.fields.client,
-			}
-			got, err := s.TransactionCount(tt.args.ctx, tt.args.hash)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("TransactionCount() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if got != tt.want {
-				t.Errorf("TransactionCount() got = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestEthereumService_TransactionReceipt(t *testing.T) {
-	type fields struct {
-		client *ethclient.Client
-	}
-	type args struct {
-		ctx  context.Context
-		hash common.Hash
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		want    *types.Receipt
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			s := &EthereumService{
-				client: tt.fields.client,
-			}
-			got, err := s.TransactionReceipt(tt.args.ctx, tt.args.hash)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("TransactionReceipt() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("TransactionReceipt() got = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestNewEthereumService(t *testing.T) {
-	type args struct {
-		client *ethclient.Client
-	}
-	tests := []struct {
-		name string
-		args args
-		want *EthereumService
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := NewEthereumService(tt.args.client); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewEthereumService() = %v, want %v", got, tt.want)
 			}
 		})
 	}

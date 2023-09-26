@@ -4,9 +4,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-type EthereumBlockData struct {
-}
-
 type AccessTuple struct {
 	Address     common.Address `json:"address"     bson:"address"`
 	StorageKeys []common.Hash  `json:"storageKeys" bson:"storageKeys"`
