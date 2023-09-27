@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 	"scanner/cmd/ethereum/internal"
-	"scanner/internal/models"
+	"scanner/internal/documents"
 	blockchain2 "scanner/pkg/blockchain"
 	"scanner/pkg/connection"
 	"scanner/pkg/env"
@@ -27,7 +27,7 @@ func main() {
 	}
 
 	mongoClient := connection.NewMongoConnection(os.Getenv("MONGO_URI"))
-	transactionRepository := repository.NewMongoRepository[models.EthereumTransaction](mongoClient.Database("ethereum").Collection("transactions"))
+	transactionRepository := repository.NewMongoRepository[documents.EthereumTransaction](mongoClient.Database("ethereum").Collection("transactions"))
 
 	container := internal.NewContainer(blockchain2.NewEthereumService(ethClient), transactionRepository)
 	app := internal.New(container)

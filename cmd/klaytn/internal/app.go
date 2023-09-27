@@ -1,10 +1,11 @@
 package internal
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"math/big"
-	"scanner/pkg/blockchain"
+	"scanner/internal/documents"
 	"time"
 )
 
@@ -40,8 +41,9 @@ func (a *App) Scan() error {
 			}
 
 			var (
+				ctx                      = context.Background()
 				prevBlockNumber          = uint64(0)
-				currentBlockNumber, _err = client.CurrentBlockNumber()
+				currentBlockNumber, _err = client.CurrentBlockNumber(ctx)
 			)
 
 			if _err != nil {
@@ -57,9 +59,9 @@ func (a *App) Scan() error {
 
 			var (
 				bigIntCurrentBlockNumber = big.NewInt(int64(currentBlockNumber))
-				block                    *blockchain.KlaytnBlock
+				block                    *documents.KlaytnBlock
 			)
-			block, _err = client.GetBlockByNumber(bigIntCurrentBlockNumber)
+			block, _err = client.GetBlockByNumber(ctx, bigIntCurrentBlockNumber)
 			if _err != nil {
 				log.Printf("failed to get block by number: %v\n", _err)
 				retryCount++
