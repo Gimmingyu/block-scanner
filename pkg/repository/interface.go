@@ -30,7 +30,4 @@ func NewMongoRepository[T Collection](conn *mongo.Collection) MongoRepository[T]
 
 type Table interface {
 	Table() string
-	Alias() string
-	Columns() []string
-	Values() []interface{}
 }
