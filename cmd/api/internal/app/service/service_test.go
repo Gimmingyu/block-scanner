@@ -5,6 +5,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
 	"os"
+	"scanner/cmd/api/internal/app/dto"
 	"scanner/internal/entity"
 	"scanner/pkg/connection"
 	"scanner/pkg/env"
@@ -16,6 +17,8 @@ var (
 	redisClient *redis.Client
 
 	authService *AuthService
+
+	payload dto.Payload
 )
 
 func init() {

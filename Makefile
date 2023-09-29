@@ -11,6 +11,7 @@ CYAN   := $(shell tput -Txterm setaf 6)
 RESET  := $(shell tput -Txterm sgr0)
 
 ETHEREUM = ethereum
+API = api
 
 all: help
 
@@ -27,6 +28,16 @@ ethereum: ## Build ethereum.
 run-ethereum: ethereum ## Run ethereum.
 	@echo "${GREEN}Running ${CYAN}$(ETHEREUM)${GREEN}...${RESET}"
 	@$(GOCMD) run $(CMD)/$(ETHEREUM)/$(ENTRY)
+
+## API Server:
+api:
+	@echo "${GREEN}Building ${CYAN}$(API)${GREEN}...${RESET}"
+	@$(GOCMD) build -o $(INIT)/$(API) $(CMD)/$(API)/$(ENTRY)
+
+## Run API Server:
+run-api: api ## Run API Server.
+	@echo "${GREEN}Running ${CYAN}$(API)${GREEN}...${RESET}"
+	@$(GOCMD) run $(CMD)/$(API)/$(ENTRY)
 
 ## Help:
 help: ## Show this help.

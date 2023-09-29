@@ -2,7 +2,7 @@ package dto
 
 import "github.com/golang-jwt/jwt/v4"
 
-type JwtPayload struct {
+type Payload struct {
 	UUID string `json:"uuid"`
 	jwt.RegisteredClaims
 }

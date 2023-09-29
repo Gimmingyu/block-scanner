@@ -4,18 +4,15 @@ import (
 	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
+	"scanner/cmd/api/internal/app/service"
 )
 
 type Container struct {
-	db    *gorm.DB
-	redis *redis.Client
-	mongo *mongo.Client
+	authService *service.AuthService
 }
 
 func NewContainer(gormClient *gorm.DB, redisClient *redis.Client, mongoClient *mongo.Client) *Container {
 	return &Container{
-		db:    gormClient,
-		redis: redisClient,
-		mongo: mongoClient,
+		authService: service.NewAuthService(gormClient, redisClient),
 	}
 }
