@@ -12,7 +12,7 @@ func FindByID[T Table](tx *gorm.DB, id uint) (*T, error) {
 	)
 
 	if err = tx.Table(table.Table()).Where("id = ?", id).First(&result).Error; err != nil {
-		return nil, tx.Rollback().Error
+		return nil, err
 	}
 
 	return result, nil
@@ -26,7 +26,7 @@ func FindOne[T Table](tx *gorm.DB, where map[string]interface{}) (*T, error) {
 	)
 
 	if err = tx.Table(table.Table()).Where(where).First(&result).Error; err != nil {
-		return nil, tx.Rollback().Error
+		return nil, err
 	}
 
 	return result, nil
@@ -40,7 +40,7 @@ func FindMany[T Table](tx *gorm.DB, where map[string]interface{}) ([]*T, error) 
 	)
 
 	if err = tx.Table(table.Table()).Where(where).Find(&result).Error; err != nil {
-		return nil, tx.Rollback().Error
+		return nil, err
 	}
 
 	return result, nil
@@ -59,7 +59,7 @@ func Insert[T Table](tx *gorm.DB, model *T) error {
 	return nil
 }
 
-func InsertMany[T Table](tx *gorm.DB, models []*T, batchSize int) error {
+func InsertMany[T Table](tx *gorm.DB, models []T, batchSize int) error {
 	var (
 		table T
 		err   error
@@ -124,7 +124,7 @@ func FindWithJoin[T Table](tx *gorm.DB, join string, where map[string]interface{
 	)
 
 	if err = tx.Table(table.Table()).Joins(join).Where(where).Find(&result).Error; err != nil {
-		return nil, tx.Rollback().Error
+		return nil, err
 	}
 
 	return result, nil
@@ -138,7 +138,7 @@ func FindWithSubQuery[T Table](tx *gorm.DB, subQuery, where map[string]interface
 	)
 
 	if err = tx.Table(table.Table()).Where(where).Where(subQuery).Find(&result).Error; err != nil {
-		return nil, tx.Rollback().Error
+		return nil, err
 	}
 
 	return result, nil
