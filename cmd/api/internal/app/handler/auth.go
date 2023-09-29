@@ -31,12 +31,22 @@ func (a *AuthHandler) Login(ctx *gin.Context) {
 		return
 	}
 
+	if err = a.container.AuthService().Login(ctx, req); err != nil {
+		presenter.Error(ctx, err)
+		return
+	}
+
 	presenter.Success(ctx, req)
 }
 
 func (a *AuthHandler) Register(ctx *gin.Context) {
 	req, err := presenter.BindJSON[dto.RegisterRequest](ctx)
 	if err != nil {
+		presenter.Error(ctx, err)
+		return
+	}
+
+	if err = a.container.AuthService().Register(ctx, req); err != nil {
 		presenter.Error(ctx, err)
 		return
 	}
@@ -51,12 +61,22 @@ func (a *AuthHandler) Logout(ctx *gin.Context) {
 		return
 	}
 
+	if err = a.container.AuthService().Logout(ctx, req); err != nil {
+		presenter.Error(ctx, err)
+		return
+	}
+
 	presenter.Success(ctx, req)
 }
 
 func (a *AuthHandler) Refresh(ctx *gin.Context) {
 	req, err := presenter.BindJSON[dto.RefreshRequest](ctx)
 	if err != nil {
+		presenter.Error(ctx, err)
+		return
+	}
+
+	if err = a.container.AuthService().Refresh(ctx, req); err != nil {
 		presenter.Error(ctx, err)
 		return
 	}

@@ -41,7 +41,7 @@ func main() {
 	_container := container.NewContainer(gormClient, redisClient, mongoClient)
 	_app := app.NewApp(_container)
 	_app.AppendHandler(handler.Handlers(_container)...)
-
+	_app.SetRouter()
 	if err := _app.Run(); err != nil {
 		panic(err)
 	}

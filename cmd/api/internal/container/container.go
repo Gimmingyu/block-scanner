@@ -16,3 +16,7 @@ func NewContainer(gormClient *gorm.DB, redisClient *redis.Client, mongoClient *m
 		authService: service.NewAuthService(gormClient, redisClient),
 	}
 }
+
+func (c *Container) AuthService() *service.AuthService {
+	return c.authService
+}
