@@ -21,9 +21,9 @@ func (a *AuthHandler) Index(router *gin.Engine) {
 	group := router.Group("auth")
 
 	group.POST("/login", a.Login)
-	group.POST("/register", middlewares.Authenticated(), a.Register)
-	group.POST("/logout", a.Logout)
-	group.POST("/refresh", a.Refresh)
+	group.POST("/register", a.Register)
+	group.POST("/logout", middlewares.Authenticated(), a.Logout)
+	group.POST("/refresh", middlewares.Authenticated(), a.Refresh)
 }
 
 func (a *AuthHandler) Login(ctx *gin.Context) {

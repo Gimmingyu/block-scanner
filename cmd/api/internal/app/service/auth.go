@@ -86,21 +86,17 @@ func (a *AuthService) Register(ctx context.Context, req *dto.RegisterRequest) er
 func (a *AuthService) Logout(ctx context.Context, req *dto.LogoutRequest) error {
 	return a.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 
-		tokenStr, ok := ctx.Value("token").(string)
+		payload, ok := ctx.Value("payload").(dto.Payload)
 		if !ok {
-			return errors.New("no JWT token in context")
+			return errors.New("no JWT payload in context")
 		}
 
-		var payload = dto.Payload{}
-		token, err := jwt.ParseWithClaims(tokenStr, &payload, func(token *jwt.Token) (interface{}, error) {
-			return []byte(a.signature), nil
-		})
-
-		if err != nil || !token.Valid {
-			return errors.New("invalid JWT token")
+		user, err := repository.FindOne[entity.User](tx, map[string]interface{}{"uuid": payload.UUID})
+		if err != nil {
+			return fmt.Errorf("user not found: %v", err)
 		}
 
-		return a.redis.Del(ctx, payload.UUID).Err()
+		return a.redis.Del(ctx, user.UUID).Err()
 	})
 }
 
@@ -121,6 +117,6 @@ func (a *AuthService) Refresh(ctx context.Context, req *dto.RefreshRequest) erro
 			return err
 		}
 
-		return a.redis.SetEx(ctx, payload.UUID, token, time.Hour*24).Err()
+		return a.redis.SetEx(ctx, user.UUID, token, time.Hour*24).Err()
 	})
 }
