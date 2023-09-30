@@ -33,12 +33,13 @@ func (a *AuthHandler) Login(ctx *gin.Context) {
 		return
 	}
 
-	if err = a.container.AuthService().Login(ctx, req); err != nil {
+	token, err := a.container.AuthService().Login(ctx, req)
+	if err != nil {
 		presenter.Error(ctx, http.StatusBadRequest, err)
 		return
 	}
 
-	presenter.Success(ctx, req)
+	presenter.Success(ctx, token)
 }
 
 func (a *AuthHandler) Register(ctx *gin.Context) {
@@ -53,7 +54,7 @@ func (a *AuthHandler) Register(ctx *gin.Context) {
 		return
 	}
 
-	presenter.Success(ctx, req)
+	presenter.Success(ctx, "Success")
 }
 
 func (a *AuthHandler) Logout(ctx *gin.Context) {
@@ -68,7 +69,7 @@ func (a *AuthHandler) Logout(ctx *gin.Context) {
 		return
 	}
 
-	presenter.Success(ctx, req)
+	presenter.Success(ctx, "Success")
 }
 
 func (a *AuthHandler) Refresh(ctx *gin.Context) {
@@ -83,5 +84,5 @@ func (a *AuthHandler) Refresh(ctx *gin.Context) {
 		return
 	}
 
-	presenter.Success(ctx, req)
+	presenter.Success(ctx, "Success")
 }

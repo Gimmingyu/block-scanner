@@ -44,10 +44,14 @@ func (a *AuthService) createJwtToken(user *entity.User) (string, error) {
 	return token.SignedString([]byte(a.signature))
 }
 
-func (a *AuthService) Login(ctx context.Context, req *dto.LoginRequest) error {
-	return a.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		where := map[string]interface{}{"email": req.Email}
-		user, err := repository.FindOne[entity.User](tx, where)
+func (a *AuthService) Login(ctx context.Context, req *dto.LoginRequest) (token string, err error) {
+	if err = a.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var (
+			where = map[string]interface{}{"email": req.Email}
+			user  *entity.User
+		)
+
+		user, err = repository.FindOne[entity.User](tx, where)
 		if err != nil {
 			return fmt.Errorf("user not found: %v", err)
 		}
@@ -56,13 +60,17 @@ func (a *AuthService) Login(ctx context.Context, req *dto.LoginRequest) error {
 			return err
 		}
 
-		token, err := a.createJwtToken(user)
+		token, err = a.createJwtToken(user)
 		if err != nil {
 			return err
 		}
 
 		return a.redis.SetEx(ctx, user.UUID, token, time.Hour*24).Err()
-	})
+	}); err != nil {
+		return "", err
+	}
+
+	return token, nil
 }
 
 func (a *AuthService) Register(ctx context.Context, req *dto.RegisterRequest) error {

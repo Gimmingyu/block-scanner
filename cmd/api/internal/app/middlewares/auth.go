@@ -4,10 +4,12 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
+	"log"
 	"net/http"
 	"os"
 	"scanner/cmd/api/internal/app/dto"
 	"scanner/cmd/api/internal/app/presenter"
+	"strings"
 )
 
 func Authenticated() gin.HandlerFunc {
@@ -28,6 +30,10 @@ func Authenticated() gin.HandlerFunc {
 			presenter.Error(ctx, http.StatusUnauthorized, errors.New("unauthorized"))
 			return
 		}
+
+		log.Println(authorization)
+		authorization = strings.TrimPrefix(authorization, "Bearer ")
+		log.Println(authorization)
 
 		var payload dto.Payload
 		token, err := jwt.ParseWithClaims(authorization, &payload, func(token *jwt.Token) (interface{}, error) {
