@@ -15,28 +15,33 @@ import (
 )
 
 type AuthService struct {
-	db    *gorm.DB
-	redis *redis.Client
+	db        *gorm.DB
+	redis     *redis.Client
+	signature string
+	issuer    string
 }
 
 func NewAuthService(db *gorm.DB, redis *redis.Client) *AuthService {
-	return &AuthService{db: db, redis: redis}
+	return &AuthService{
+		db:        db,
+		redis:     redis,
+		signature: os.Getenv("JWT_SIGNATURE"),
+		issuer:    os.Getenv("JWT_ISSUER"),
+	}
 }
 
 func (a *AuthService) createJwtToken(user *entity.User) (string, error) {
 	claims := &dto.Payload{
 		UUID: user.UUID,
 		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:    "primrose",
+			Issuer:    a.issuer,
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
 
-	signature := os.Getenv("JWT_SIGNATURE")
-
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(signature))
+	return token.SignedString([]byte(a.signature))
 }
 
 func (a *AuthService) Login(ctx context.Context, req *dto.LoginRequest) error {
@@ -88,7 +93,7 @@ func (a *AuthService) Logout(ctx context.Context, req *dto.LogoutRequest) error 
 
 		var payload = dto.Payload{}
 		token, err := jwt.ParseWithClaims(tokenStr, &payload, func(token *jwt.Token) (interface{}, error) {
-			return []byte(os.Getenv("JWT_SIGNATURE")), nil
+			return []byte(a.signature), nil
 		})
 
 		if err != nil || !token.Valid {
@@ -101,19 +106,19 @@ func (a *AuthService) Logout(ctx context.Context, req *dto.LogoutRequest) error 
 
 func (a *AuthService) Refresh(ctx context.Context, req *dto.RefreshRequest) error {
 	return a.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-
-		tokenStr, ok := ctx.Value("token").(string)
+		payload, ok := ctx.Value("payload").(dto.Payload)
 		if !ok {
-			return errors.New("no JWT token in context")
+			return errors.New("no JWT payload in context")
 		}
 
-		var payload = dto.Payload{}
-		token, err := jwt.ParseWithClaims(tokenStr, &payload, func(token *jwt.Token) (interface{}, error) {
-			return []byte(os.Getenv("JWT_SIGNATURE")), nil
-		})
+		user, err := repository.FindOne[entity.User](tx, map[string]interface{}{"uuid": payload.UUID})
+		if err != nil {
+			return fmt.Errorf("user not found: %v", err)
+		}
 
-		if err != nil || !token.Valid {
-			return errors.New("invalid JWT token")
+		token, err := a.createJwtToken(user)
+		if err != nil {
+			return err
 		}
 
 		return a.redis.SetEx(ctx, payload.UUID, token, time.Hour*24).Err()

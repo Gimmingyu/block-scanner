@@ -9,8 +9,8 @@ func Success(ctx *gin.Context, data interface{}) {
 	})
 }
 
-func Error(ctx *gin.Context, err error) {
-	ctx.JSON(200, gin.H{
+func Error(ctx *gin.Context, code int, err error) {
+	ctx.JSON(code, gin.H{
 		"status": "error",
 		"result": err.Error(),
 	})
